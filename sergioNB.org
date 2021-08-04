@@ -579,6 +579,32 @@ gcloud beta compute ssh --zone "us-central1-f" "g5-n1-controller"  --tunnel-thro
 - error message
 ERROR: (gcloud.beta.compute.ssh) User [sergio.angulo@gmail.com] does not have permission to access users instance [sergio.angulo@gmail.com:importSshPublicKey] (or it may not exist): Insufficient IAM permissions. The instance belongs to an external organization. You must be granted the roles/compute.osLoginExternalUser IAM role on the external organization to configure POSIX account information.
 
+* 8/4
+** git repo fork
+- salva recs:
+you need to fork the repo first to your github account
+
+salvadord  4 hours ago
+you do this via the github website
+
+salvadord  4 hours ago
+https://docs.github.com/en/get-started/quickstart/fork-a-repo
+
+salvadord  4 hours ago
+then clone your forked repo, not the original one
+
+- tried to follow upstream but push for changes in the new fork and couldnt publish changes to my github
+
+- then clone empty repo from my account 
+git clone https://slanguloc@github.com/slanguloc/HFO.git 
+
+- Copy/past files from A1 to HFO
+- Commit and push to HFO
+- update files
+- batch running 
+
+
+
 
 * TODO
 [x] git clone of A1 into my local files 

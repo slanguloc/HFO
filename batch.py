@@ -229,12 +229,12 @@ def weightNorm(pops=[], rule = None, segs = None, allSegs = True, weights=list(n
 def EIbalance():
     params = specs.ODict()
 
-    params['EEGain'] = [0.5, 1.0, 1.5] 
-    params['EIGain'] = [0.5, 1.0, 1.5] 
-    params['IEGain'] = [0.5, 1.0, 1.5] 
-    params['IIGain'] = [0.5, 1.0, 1.5]
-    params[('weightBkg', 'E')] = [2.0, 3.0]
-    params[('weightBkg', 'I')] = [2.0, 3.0]
+    params['EEGain'] = [0.5, 1.0] 
+    params['EIGain'] = [0.5, 1.0] 
+    #params['IEGain'] = [0.5, 1.0, 1.5] 
+    #params['IIGain'] = [0.5, 1.0, 1.5]
+    #params[('weightBkg', 'E')] = [2.0, 3.0]
+    #params[('weightBkg', 'I')] = [2.0, 3.0]
     
     groupedParams =  []
 
@@ -246,6 +246,72 @@ def EIbalance():
     b = Batch(params=params, groupedParams=groupedParams, initCfg=initCfg)
 
     return b
+
+def EIbalance1():
+    params = specs.ODict()
+
+    # from prev 
+    import json
+    with open('data/v34_batch25/trial_2142/trial_2142_cfg.json', 'rb') as f:
+        cfgLoad = json.load(f)['simConfig']
+    cfgLoad2 = cfgLoad
+
+    params['EEGain'] = [0.5, 1.0] 
+    params['EIGain'] = [0.5, 1.0] 
+    
+    groupedParams =  []
+
+    # initial config
+    initCfg = {}
+    initCfg['duration'] = 1.0 * 1e3
+    initCfg['scaleDensity'] = 0.01 #0.05
+    
+ # plotting and saving params
+    initCfg[('analysis','plotRaster','timeRange')] = initCfg['printPopAvgRates']
+    initCfg[('analysis', 'plotTraces', 'timeRange')] = initCfg['printPopAvgRates']
+    initCfg[('analysis', 'plotLFP', 'timeRange')] = initCfg['printPopAvgRates']
+    initCfg[('analysis', 'plotCSD', 'timeRange')] = [1500, 1700]
+
+    # changed directly in cfg.py    
+    #initCfg[('analysis', 'plotCSD')] = {'spacing_um': 100, 'timeRange': initCfg['printPopAvgRates'], 'LFP_overlay': 1, 'layer_lines': 1, 'saveFig': 1, 'showFig': 0}
+    #initCfg['recordLFP'] = [[100, y, 100] for y in range(0, 2000, 100)]
+
+    initCfg['saveCellSecs'] = False
+    initCfg['saveCellConns'] = False
+    
+    # from prev - best of 50% cell density
+    updateParams = ['EEGain', 'EIGain', 'IEGain', 'IIGain',
+                    ('EICellTypeGain', 'PV'), ('EICellTypeGain', 'SOM'), ('EICellTypeGain', 'VIP'), ('EICellTypeGain', 'NGF'),
+                    ('IECellTypeGain', 'PV'), ('IECellTypeGain', 'SOM'), ('IECellTypeGain', 'VIP'), ('IECellTypeGain', 'NGF'),
+                    ('EILayerGain', '1'), ('IILayerGain', '1'),
+                    ('EELayerGain', '2'), ('EILayerGain', '2'),  ('IELayerGain', '2'), ('IILayerGain', '2'), 
+                    ('EELayerGain', '3'), ('EILayerGain', '3'), ('IELayerGain', '3'), ('IILayerGain', '3'), 
+                    ('EELayerGain', '4'), ('EILayerGain', '4'), ('IELayerGain', '4'), ('IILayerGain', '4'), 
+                    ('EELayerGain', '5A'), ('EILayerGain', '5A'), ('IELayerGain', '5A'), ('IILayerGain', '5A'), 
+                    ('EELayerGain', '5B'), ('EILayerGain', '5B'), ('IELayerGain', '5B'), ('IILayerGain', '5B'), 
+                    ('EELayerGain', '6'), ('EILayerGain', '6'), ('IELayerGain', '6'), ('IILayerGain', '6')] 
+
+    for p in updateParams:
+        if isinstance(p, tuple):
+            initCfg.update({p: cfgLoad[p[0]][p[1]]})
+        else:
+            initCfg.update({p: cfgLoad[p]})
+
+    # good thal params for 100% cell density 
+    updateParams2 = ['thalamoCorticalGain', 'intraThalamicGain', 'EbkgThalamicGain', 'IbkgThalamicGain', 'wmat']
+
+    for p in updateParams2:
+        if isinstance(p, tuple):
+            initCfg.update({p: cfgLoad2[p[0]][p[1]]})
+        else:
+            initCfg.update({p: cfgLoad2[p]})
+
+
+    b = Batch(params=params, netParamsFile='netParams.py', cfgFile='cfg.py', initCfg=initCfg, groupedParams=groupedParams)
+    b.method = 'grid'   
+
+    return b
+
 
 
 # ----------------------------------------------------------------------------------------------
@@ -2758,7 +2824,8 @@ if __name__ == '__main__':
 
     cellTypes = ['IT2', 'PV2', 'SOM2', 'VIP2', 'NGF2', 'IT3', 'ITP4', 'ITS4', 'IT5A', 'CT5A', 'IT5B', 'PT5B', 'CT5B', 'IT6', 'CT6', 'TC', 'HTC', 'IRE', 'TI']
 
-    b = custom()
+    b = EIbalance()
+    # b = custom()
     # b = evolRates()
     # b = asdRates()
     #b = optunaRates()
@@ -2771,10 +2838,10 @@ if __name__ == '__main__':
     #b = bkgWeights2D(pops = ['ITS4'], weights = list(np.arange(0,150,10)))
     #b = fIcurve(pops=['ITS4']) 
 
-    b.batchLabel = 'v34_batch27' 
+    b.batchLabel = 'v34_batch28' 
     b.saveFolder = 'data/'+b.batchLabel
 
-    setRunCfg(b, 'hpc_slurm_gcp') #'hpc_slurm_gcp') #'mpi_bulletin') #'hpc_slurm_gcp')
+    setRunCfg(b, 'mpi_bulletin') #'hpc_slurm_gcp') #'hpc_slurm_gcp') #'mpi_bulletin') #'hpc_slurm_gcp')
     b.run() # run batch
 
 

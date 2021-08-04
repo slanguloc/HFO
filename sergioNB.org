@@ -1,0 +1,593 @@
+(setq org-cycle-emulate-tab 't)
+
+* 7/26      
+            
+Check shell
+echo "$SHELL"
+
+Change shell to ZSH
+chsh -s /bin/zsh
+
+Install python3
+  
+See video from Joe:
+https://www.youtube.com/watch?v=DU_yUJToH2E
+
+Joe suggesting creating a new volume and start from scratch
+
+Activate virtual  environment from local dir:
+source env/bin/activate
+
+
+* 7/27
+** Create virtual env:
+        
+Mkdir temp
+Cd temp
+python3 -m venv env
+source env/bin/activate
+python -m pip install --upgrade pip
+python -m pip install --upgrade wheel
+python -m pip install ipython
+python -m pip install --upgrade neuron
+
+** install MPI
+Installed MPI as per joe: https://docs.google.com/document/d/1sCGbopCXzZBDkjLAzgZ5HI_GWEMZbKUGOeseTfyzZx0/edit
+
+
+** .zhrc from joe
+Got copy of .zshrc from joe 
+
+venv_make () {
+	echo "" 
+	echo "Preparing a virtual environment for NetPyNE" 
+	echo "============================================================================="
+	echo "Using Python version:"
+	python3 --version
+	echo "Using Python from:"
+	which python3
+	
+	echo 
+	echo "Creating a virtual environment: python3 -m venv env"
+	echo "-----------------------------------------------------------------------------"
+	python3 -m venv env
+	
+	echo 
+	echo "Activating virtual environment: source env/bin/activate"
+	echo "-----------------------------------------------------------------------------"
+	source env/bin/activate
+	
+	echo 
+	echo "Updating pip: python3 -m pip install --upgrade pip"
+	echo "-----------------------------------------------------------------------------"
+	python3 -m pip install --upgrade pip
+
+	echo 
+	echo "Installing wheel: python3 -m pip install --upgrade wheel"
+	echo "-----------------------------------------------------------------------------"
+	python3 -m pip install --upgrade wheel
+	
+	echo 
+	echo "Installing ipython: python3 -m pip install --upgrade ipython"
+	echo "-----------------------------------------------------------------------------"
+	python3 -m pip install --upgrade ipython
+	
+	echo
+	echo "Installing mpi4py: python3 -m pip install --upgrade mpi4py"
+	echo "-----------------------------------------------------------------------------"
+	python3 -m pip install --upgrade mpi4py
+
+
+	echo 
+	echo "Installing NEURON: python3 -m pip install --upgrade neuron"
+	echo "-----------------------------------------------------------------------------"
+	python3 -m pip install --upgrade neuron 
+	
+	echo 
+	echo "Cloning NetPyNE: git clone https://github.com/Neurosim-lab/netpyne.git"
+	echo "-----------------------------------------------------------------------------"
+	git clone https://github.com/Neurosim-lab/netpyne.git 
+	
+	echo 
+	echo "Installing NetPyNE: python3 -m pip install -e netpyne"
+	echo "-----------------------------------------------------------------------------"
+	python3 -m pip install -e netpyne 
+	
+	echo 
+	echo "Installing ipykernel for Jupyter: python3 -m pip install --upgrade ipykernel"
+	echo "-----------------------------------------------------------------------------"
+	python3 -m pip install --upgrade ipykernel 
+	
+	echo 
+	echo "Installing Jupyter: python3 -m pip install --upgrade jupyter"
+	echo "-----------------------------------------------------------------------------"
+	python3 -m pip install --upgrade jupyter
+	
+	echo 
+	echo "Creating a kernel for Jupyter: ipython kernel install --user --name=env"
+	echo "-----------------------------------------------------------------------------"
+	ipython kernel install --user --name=env
+
+	echo 
+	echo "============================================================================="
+	echo "Your virtual environment is ready for use."
+	echo ""
+	echo "To deactivate, execute: deactivate"
+	echo "To reactivate, execute: source $PWD/env/bin/activate"
+	echo "============================================================================="
+}
+
+venv_activate () {
+	echo 
+	echo "============================================================================="
+	echo "Activating virtual environment..." 
+	if [ ! -d "$PWD/env" ]; then
+		echo
+		echo "Virtual environment not found in:"
+		echo "$PWD"
+		echo 
+		echo "Searching parent directories..."
+		origdir=$PWD
+		curdir=$PWD
+		while [ ! -d "$curdir/env" ]; do
+			parentdir="$(dirname "$curdir")"
+			if [ "$parentdir" = "$curdir" ]; then
+				echo "Virtual environment not found."
+				echo "============================================================================="
+				break
+			fi
+			echo "  $parentdir"
+			cd $parentdir
+			curdir=$PWD
+		done
+		echo
+		echo "Virtual environment found in:"
+		echo "$PWD/env"
+		echo 
+		echo "Activating virtual environment with the following command:"
+		echo "source $PWD/env/bin/activate"
+		source env/bin/activate
+		cd $origdir
+		echo "============================================================================="
+	else
+		echo
+		echo "Virtual environment found in:"
+		echo "$PWD/env"
+		echo 
+		echo "Activating virtual environment with the following command:"
+		echo "source $PWD/env/bin/activate"
+		source env/bin/activate
+		echo "============================================================================="
+	fi
+	echo
+}
+
+alias venv_deactivate='deactivate'
+
+Needs mpi4py to run multiple cores.
+
+
+* 7/28
+
+** Plan with salva
+
+Talk to salva, this is the plan:
+1) get set up on GCP - run baseline A1 with coreNEURON + LFP
+2) set up and run batch to explore: 1) inc E weights, 2) dec I weights, 3) Cl- reversal potential (all cells)
+3) send "all cells" data to shennan he will analyze spikes+HFOs
+
+
+*** Check model A1:
+
+https://github.com/NathanKlineInstitute/A1/tree/salva_layers
+
+*** Review files: netParams.py, cfg.py, init.py y batch.py
+
+*** Review google cloud and run sims:
+https://docs.google.com/document/d/1w0QXqLexAz81-Ik0zQK4ZQ1GQdn9-dsJ5QV-M2iNXKs/edit?usp=sharing
+
+
+** Run batch
+mpiexec -np 4 nrniv -mpi -python batch.py
+
+* 7/29
+** create a new project using git
+https://github.com/slanguloc/HFO.git
+
+- then clone it into my local file using git clone
+- copied the A1 model into new repo locally
+- check status of repository
+  git status
+- adding files to repo
+  git add --all
+- commiting changes
+  git commit -m "adding A1 model"
+- pushing to repo
+  git push
+
+** google cloud
+- check document:
+https://docs.google.com/document/d/1w0QXqLexAz81-Ik0zQK4ZQ1GQdn9-dsJ5QV-M2iNXKs/edit?usp=sharing
+
+- problem: no time until aug 1st to use google cloud
+- solution: needs to run from local machine 
+
+** salva prefers to create a fork on git
+- remove all files from git
+  git rm -r *    
+- commit and push
+
+** created a repo from A1 in temp dir with virtual env
+- in temp
+git clone https://github.com/NathanKlineInstitute/A1.git
+venv_activate
+
+** needs to compile
+cd A1/mod
+nrnivmodl
+
+** run model
+pyhton init.py
+
+problem, main branch needs to be debugged
+needs to use salva_layers branch
+
+** cloning salva branch
+git clone -b salva_layers https://github.com/NathanKlineInstitute/A1.git
+
+
+** runing model has new problem with fix:
+Traceback (most recent call last):
+ File "/Users/sergioangulo/temp/A1/init.py", line 20, in <module>
+  from netpyne import sim
+ File "/Users/sergioangulo/temp/netpyne/netpyne/__init__.py", line 22, in <module>
+  from netpyne import batch
+ File "/Users/sergioangulo/temp/netpyne/netpyne/batch/__init__.py", line 12, in <module>
+  from .batch import Batch
+ File "/Users/sergioangulo/temp/netpyne/netpyne/batch/batch.py", line 44, in <module>
+  from .asd_parallel import asdOptim
+ File "/Users/sergioangulo/temp/netpyne/netpyne/batch/asd_parallel.py", line 42, in <module>
+  from netpyne import sim,specs
+ File "/Users/sergioangulo/temp/netpyne/netpyne/sim/__init__.py", line 57, in <module>
+  from ..cell import CompartCell, PointCell, NML2Cell, NML2SpikeSource
+ File "/Users/sergioangulo/temp/netpyne/netpyne/cell/__init__.py", line 12, in <module>
+  from .compartCell import CompartCell
+ File "/Users/sergioangulo/temp/netpyne/netpyne/cell/compartCell.py", line 1398
+  if 'geom' in sec and 'pt3d' not in sec['geom'] and isinstance(sec['hObj'], type(h.Section())):: # only cells that didn't have pt3d before
+                                                 ^
+SyntaxError: invalid syntax
+
+
+- fix
+  instead of compiling from mod folder need to be from A1 forder and compile as "nrnivmodl mod"
+
+** netpyne developer install (not using it at the moment, maybe in the future)
+git clone https://github.com/Neurosim-lab/netpyne.git
+cd netpyne
+git checkout development
+pip install -e .
+cd ..
+
+** running sim
+- change number of cells
+in cfg.py line 113
+cfg.scaleDensity = 0.01
+
+it creates network of 112 cells
+
+- command to run single sim
+python init.py
+
+
+** run batch
+mpiexec -np 2 nrniv -mpi -python batch.py
+
+- running into trouble
+(env) sergioangulo@Sergios-MBP A1 % mpiexec -np 2 nrniv -mpi -python batch.py
+numprocs=2
+NEURON -- VERSION 8.0.0 HEAD (429d11ef) 2021-04-30
+Duke, Yale, and the BlueBrain Project -- Copyright 1984-2021
+See http://neuron.yale.edu/neuron/credits
+
+Additional mechanisms from files
+ "mod/APCounter2.mod" "mod/CA1ika.mod" "mod/CA1ikdr.mod" "mod/CA1ina.mod" "mod/Cadynamics.mod" "mod/DynamicNetStim.mod" "mod/HH2.mod" "mod/HH_traub.mod" "mod/IC.mod" "mod/ICal.mod" "mod/IKM.mod" "mod/IKsin.mod" "mod/IL.mod" "mod/IL_gutnick.mod" "mod/IM_cortex.mod" "mod/IT.mod" "mod/IT2.mod" "mod/Iahp.mod" "mod/Ican.mod" "mod/MyExp2SynAlpha.mod" "mod/MyExp2SynBB.mod" "mod/MyExp2SynNMDABB.mod" "mod/Nca.mod" "mod/ar_traub.mod" "mod/beforestep_py.mod" "mod/cad.mod" "mod/cadad.mod" "mod/cadecay_destexhe.mod" "mod/cadyn.mod" "mod/cagk.mod" "mod/cal_mh.mod" "mod/cal_mig.mod" "mod/can_mig.mod" "mod/cancr.mod" "mod/canin.mod" "mod/caolmw.mod" "mod/capr.mod" "mod/cat_mig.mod" "mod/cat_traub.mod" "mod/catcb.mod" "mod/ch_CavL.mod" "mod/ch_CavN.mod" "mod/ch_KCaS.mod" "mod/ch_Kdrfastngf.mod" "mod/ch_KvAngf.mod" "mod/ch_KvCaB.mod" "mod/ch_Navngf.mod" "mod/ch_leak.mod" "mod/cp.mod" "mod/cp2.mod" "mod/gabab.mod" "mod/h_BS.mod" "mod/h_harnett.mod" "mod/h_kole.mod" "mod/h_migliore.mod" "mod/hin.mod" "mod/htc.mod" "mod/ican_sidi.mod" "mod/icaolmw.mod" "mod/icapr.mod" "mod/iccr.mod" "mod/iconc_Ca.mod" "mod/iholmkop.mod" "mod/iholmw.mod" "mod/ihpyrkop.mod" "mod/ikscr.mod" "mod/ipulse3.mod" "mod/kBK.mod" "mod/kahppr.mod" "mod/kaolmkop.mod" "mod/kap_BS.mod" "mod/kapcb.mod" "mod/kapin.mod" "mod/kapyrkop.mod" "mod/kca.mod" "mod/kcaolmw.mod" "mod/kcpr.mod" "mod/kctin.mod" "mod/kdmc_BS.mod" "mod/kdr2_orig.mod" "mod/kdr_BS.mod" "mod/kdrbwb.mod" "mod/kdrcr.mod" "mod/kdrin.mod" "mod/kdrolmkop.mod" "mod/kdrpr.mod" "mod/kdrpyrkop.mod" "mod/kl.mod" "mod/km.mod" "mod/kv.mod" "mod/my_exp2syn.mod" "mod/na_2.mod" "mod/naf2.mod" "mod/nafbwb.mod" "mod/nafcr.mod" "mod/nafolmkop.mod" "mod/nafpr.mod" "mod/nafpyrkop.mod" "mod/nafx.mod" "mod/nap_sidi.mod" "mod/nax_BS.mod" "mod/naz.mod" "mod/ntIh.mod" "mod/ntleak.mod" "mod/ntt.mod" "mod/ntt_int.mod" "mod/pasi.mod" "mod/savedist.mod" "mod/tia.mod" "mod/vecstim.mod" "mod/wrap.mod"
+Traceback (most recent call last):
+  File "batch.py", line 8, in <module>
+    from netpyne.batch import Batch
+ModuleNotFoundError: No module named 'netpyne'
+>>> Traceback (most recent call last):
+  File "batch.py", line 8, in <module>
+    from netpyne.batch import Batch
+ModuleNotFoundError: No module named 'netpyne'
+>>> 
+
+* 7/30 
+** try working from nrniv
+- reinstalled netpine as originally suggested by Joe but have similar error
+(env) sergioangulo@Sergios-MacBook-Pro A1 % nrniv -python init.py
+NEURON -- VERSION 8.0.0 HEAD (429d11ef) 2021-04-30
+Duke, Yale, and the BlueBrain Project -- Copyright 1984-2021
+See http://neuron.yale.edu/neuron/credits
+
+loading membrane mechanisms from x86_64/.libs/libnrnmech.so
+Additional mechanisms from files
+ "mod/APCounter2.mod" "mod/CA1ika.mod" "mod/CA1ikdr.mod" "mod/CA1ina.mod" "mod/Cadynamics.mod" "mod/DynamicNetStim.mod" "mod/HH2.mod" "mod/HH_traub.mod" "mod/IC.mod" "mod/ICal.mod" "mod/IKM.mod" "mod/IKsin.mod" "mod/IL.mod" "mod/IL_gutnick.mod" "mod/IM_cortex.mod" "mod/IT.mod" "mod/IT2.mod" "mod/Iahp.mod" "mod/Ican.mod" "mod/MyExp2SynAlpha.mod" "mod/MyExp2SynBB.mod" "mod/MyExp2SynNMDABB.mod" "mod/Nca.mod" "mod/ar_traub.mod" "mod/beforestep_py.mod" "mod/cad.mod" "mod/cadad.mod" "mod/cadecay_destexhe.mod" "mod/cadyn.mod" "mod/cagk.mod" "mod/cal_mh.mod" "mod/cal_mig.mod" "mod/can_mig.mod" "mod/cancr.mod" "mod/canin.mod" "mod/caolmw.mod" "mod/capr.mod" "mod/cat_mig.mod" "mod/cat_traub.mod" "mod/catcb.mod" "mod/ch_CavL.mod" "mod/ch_CavN.mod" "mod/ch_KCaS.mod" "mod/ch_Kdrfastngf.mod" "mod/ch_KvAngf.mod" "mod/ch_KvCaB.mod" "mod/ch_Navngf.mod" "mod/ch_leak.mod" "mod/cp.mod" "mod/cp2.mod" "mod/gabab.mod" "mod/h_BS.mod" "mod/h_harnett.mod" "mod/h_kole.mod" "mod/h_migliore.mod" "mod/hin.mod" "mod/htc.mod" "mod/ican_sidi.mod" "mod/icaolmw.mod" "mod/icapr.mod" "mod/iccr.mod" "mod/iconc_Ca.mod" "mod/iholmkop.mod" "mod/iholmw.mod" "mod/ihpyrkop.mod" "mod/ikscr.mod" "mod/ipulse3.mod" "mod/kBK.mod" "mod/kahppr.mod" "mod/kaolmkop.mod" "mod/kap_BS.mod" "mod/kapcb.mod" "mod/kapin.mod" "mod/kapyrkop.mod" "mod/kca.mod" "mod/kcaolmw.mod" "mod/kcpr.mod" "mod/kctin.mod" "mod/kdmc_BS.mod" "mod/kdr2_orig.mod" "mod/kdr_BS.mod" "mod/kdrbwb.mod" "mod/kdrcr.mod" "mod/kdrin.mod" "mod/kdrolmkop.mod" "mod/kdrpr.mod" "mod/kdrpyrkop.mod" "mod/kl.mod" "mod/km.mod" "mod/kv.mod" "mod/my_exp2syn.mod" "mod/na_2.mod" "mod/naf2.mod" "mod/nafbwb.mod" "mod/nafcr.mod" "mod/nafolmkop.mod" "mod/nafpr.mod" "mod/nafpyrkop.mod" "mod/nafx.mod" "mod/nap_sidi.mod" "mod/nax_BS.mod" "mod/naz.mod" "mod/ntIh.mod" "mod/ntleak.mod" "mod/ntt.mod" "mod/ntt_int.mod" "mod/pasi.mod" "mod/savedist.mod" "mod/tia.mod" "mod/vecstim.mod" "mod/wrap.mod"
+Traceback (most recent call last):
+  File "init.py", line 18, in <module>
+    import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
+ModuleNotFoundError: No module named 'matplotlib'
+>>> 
+
+** fix -- needs to create python path
+- example by salva
+# add netpyne dev path
+export PYTHONPATH=~/Documents/ISB/Models/netpyne_repo:~/Documents/ISB/Models/hnn2:~/Documents/ISB/Models/PySpike/:/u/salvadord/venvs/neuron8/lib/python3.8/site-packages
+# openmpi (home-brew)
+export PATH=/usr/local/bin/:$PATH
+export LD_LIBRARY_PATH=$MPI_DIR/lib:/u/salvadord/venvs/neuron8/lib/:$LD_LIBRARY_PATH
+
+- needs PYTHONPATH
+on terminal:
+export PYTHONPATH=~/temp/env/lib/python3.9/site-packages
+
+sergioangulo@Sergios-MacBook-Pro ~ % echo $PYTHONPATH
+/Users/sergioangulo/temp/env/lib/python3.9/site-packages
+
+
+- also needs LD_LIBRARY_PATH, not sure how to create 
+example: export LD_LIBRARY_PATH=/Users/sergioangulo/temp/env/lib
+
+- Documentation
+https://docs.google.com/document/d/1aznTW6GU1yqAXmOchYY6SK6KLym7F04BuomPS_e4DNw/edit#
+
+- actually PYTHONPATH need to be .zshcrc
+export PYTHONPATH=~/temp/env/lib/python3.9/site-packages
+
+- needs to add location for netpyne as well
+export PYTHONPATH=~/temp/netpyne:~/temp/env/lib/python3.9/site-packages
+
+
+* 8/1
+
+** work on batch.py
+
+- try simple example: works fine  
+# ----------------------------------------------------------------------------------------------
+# Exc-Inh balance
+# ----------------------------------------------------------------------------------------------
+def EIbalance():
+    params = specs.ODict()
+
+    params['EEGain'] = [0.5, 1.0] 
+    params['EIGain'] = [0.5, 1.0] 
+
+    
+    groupedParams =  []
+
+    # initial config
+    initCfg = {}
+    initCfg['duration'] = 1.0 * 1e3
+    initCfg['scaleDensity'] = 0.01 
+    
+    b = Batch(params=params, groupedParams=groupedParams, initCfg=initCfg)
+
+    return b
+
+if __name__ == '__main__':
+
+    cellTypes = ['IT2', 'PV2', 'SOM2', 'VIP2', 'NGF2', 'IT3', 'ITP4', 'ITS4', 'IT5A', 'CT5A', 'IT5B', 'PT5B', 'CT5B', 'IT6', 'CT6', 'TC', 'HTC', 'IRE', 'TI']
+
+    b= EIbalance()
+
+    b.batchLabel = 'v34_batch27' 
+    b.saveFolder = 'data/'+b.batchLabel
+
+    setRunCfg(b, 'mpi_bulletin') 
+    b.run() 
+
+- We will try different Exc and Inh values
+
+    params['EEGain'] = [0.5, 0.75, 1.0, 1.25] 
+    params['EIGain'] = [0.5, 0.75, 1.0, 1.25]
+    params['IEGain'] = [0.5, 0.75, 1.0, 1.25] 
+    params['IIGain'] = [0.5, 0.75, 1.0, 1.25] 
+
+- We will try different Cl reversal 
+
+# ----------------------------------------------------------------------------------------------
+# GABAA reversal 
+# ----------------------------------------------------------------------------------------------
+def GABAAreversal():
+    params = specs.ODict()
+
+    params['GABAArev'] = [-60, -70, -80, -90] 
+    
+    groupedParams =  []
+
+    # initial config
+    initCfg = {}
+    initCfg['duration'] = 1.0 * 1e3
+    initCfg['scaleDensity'] = 0.01 #0.05
+    
+    b = Batch(params=params, groupedParams=groupedParams, initCfg=initCfg)
+
+    return b
+
+
+* 8/2
+
+** conversation with salva
+si quieres primero prepara batch.py para correr una prueba… por ejemplo el parametro EEGain con dos valores… 1.0 y 1.2
+7:29
+y con el modelo a full scale
+7:30
+ah y tienes que usar los parametros tuneados de: data/v34_batch25/trial_2142/trial_2142_cfg.json’
+7:30
+fijate en la funcion: custom()
+7:31
+en tu fork asegurate que estas usando la branch ‘salva_layers’
+7:31
+haz los cambios de arriba para preparar el batch
+7:31
+y me mandas un link y asi lo chequeo antes de correrlo en gcp
+
+** setting batch.py
+
+def EIbalance():
+    params = specs.ODict()
+
+    # from prev 
+    import json
+    with open('data/v34_batch25/trial_2142/trial_2142_cfg.json', 'rb') as f:
+        cfgLoad = json.load(f)['simConfig']
+    cfgLoad2 = cfgLoad
+
+    params['EEGain'] = [0.5, 1.0] 
+    params['EIGain'] = [0.5, 1.0] 
+    
+    groupedParams =  []
+
+    # initial config
+    initCfg = {}
+    initCfg['duration'] = 1.0 * 1e3
+    initCfg['scaleDensity'] = 0.01 #0.05
+    
+ # plotting and saving params
+    initCfg[('analysis','plotRaster','timeRange')] = initCfg['printPopAvgRates']
+    initCfg[('analysis', 'plotTraces', 'timeRange')] = initCfg['printPopAvgRates']
+    initCfg[('analysis', 'plotLFP', 'timeRange')] = initCfg['printPopAvgRates']
+    initCfg[('analysis', 'plotCSD', 'timeRange')] = [1500, 1700]
+
+    # changed directly in cfg.py    
+    #initCfg[('analysis', 'plotCSD')] = {'spacing_um': 100, 'timeRange': initCfg['printPopAvgRates'], 'LFP_overlay': 1, 'layer_lines': 1, 'saveFig': 1, 'showFig': 0}
+    #initCfg['recordLFP'] = [[100, y, 100] for y in range(0, 2000, 100)]
+
+    initCfg['saveCellSecs'] = False
+    initCfg['saveCellConns'] = False
+    
+    # from prev - best of 50% cell density
+    updateParams = ['EEGain', 'EIGain', 'IEGain', 'IIGain',
+                    ('EICellTypeGain', 'PV'), ('EICellTypeGain', 'SOM'), ('EICellTypeGain', 'VIP'), ('EICellTypeGain', 'NGF'),
+                    ('IECellTypeGain', 'PV'), ('IECellTypeGain', 'SOM'), ('IECellTypeGain', 'VIP'), ('IECellTypeGain', 'NGF'),
+                    ('EILayerGain', '1'), ('IILayerGain', '1'),
+                    ('EELayerGain', '2'), ('EILayerGain', '2'),  ('IELayerGain', '2'), ('IILayerGain', '2'), 
+                    ('EELayerGain', '3'), ('EILayerGain', '3'), ('IELayerGain', '3'), ('IILayerGain', '3'), 
+                    ('EELayerGain', '4'), ('EILayerGain', '4'), ('IELayerGain', '4'), ('IILayerGain', '4'), 
+                    ('EELayerGain', '5A'), ('EILayerGain', '5A'), ('IELayerGain', '5A'), ('IILayerGain', '5A'), 
+                    ('EELayerGain', '5B'), ('EILayerGain', '5B'), ('IELayerGain', '5B'), ('IILayerGain', '5B'), 
+                    ('EELayerGain', '6'), ('EILayerGain', '6'), ('IELayerGain', '6'), ('IILayerGain', '6')] 
+
+    for p in updateParams:
+        if isinstance(p, tuple):
+            initCfg.update({p: cfgLoad[p[0]][p[1]]})
+        else:
+            initCfg.update({p: cfgLoad[p]})
+
+    # good thal params for 100% cell density 
+    updateParams2 = ['thalamoCorticalGain', 'intraThalamicGain', 'EbkgThalamicGain', 'IbkgThalamicGain', 'wmat']
+
+    for p in updateParams2:
+        if isinstance(p, tuple):
+            initCfg.update({p: cfgLoad2[p[0]][p[1]]})
+        else:
+            initCfg.update({p: cfgLoad2[p]})
+
+
+    b = Batch(params=params, netParamsFile='netParams.py', cfgFile='cfg.py', initCfg=initCfg, groupedParams=groupedParams)
+    b.method = 'grid'   
+
+    return b
+
+
+** problem: there is not tuned file config in repo
+
+Traceback (most recent call last):
+  File "batch.py", line 2796, in <module>
+    b= EIbalance()
+  File "batch.py", line 234, in EIbalance
+    with open('data/v34_batch25/trial_2142/trial_2142_cfg.json', 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'data/v34_batch25/trial_2142/trial_2142_cfg.json'
+
+** asking to salva about it 
+
+el archivo esta aqui: https://console.cloud.google.com/storage/browser/_details/salvadord_data2/A1/v34_batch25/trial_2142/trial_2142_cfg.json
+10:55
+lo puedes copiar a la maquina dnd vayas a correr las sims usando gsutil — mira el gdoc
+
+** git problem: need to update changes to a repo
+ - use a new branch
+ git branch sergio
+
+ - switch to new branch 
+ git checkout sergio
+
+- add and commit files 
+- push files: error
+sergioangulo@Sergios-MBP A1 % git push
+fatal: The current branch sergio has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin sergio
+
+- probably needs to be added as contributor on github
+
+
+ssh key:
+SHA256:oPkOpzPrrQSRZAXtUfnoh5mnQdfgG4TKEPKcrSYbkzM sergioangulo@Sergios-MBP.home
+
+** google cloud setting
+- salva got the  authorization for me 
+- need to change the seetings in my machine
+ run:
+ ./google-cloud-sdk/bin/gcloud init
+
+ - then pick option to start new settings> option 1
+ Pick configuration to use:
+ [1] Re-initialize this configuration [default] with new settings 
+ [2] Create a new configuration
+
+- pick account >my email
+ Choose the account you would like to use to perform operations for 
+this configuration:
+ [1] sergio.angulo@gmail.com
+ [2] Log in with a new account
+Please enter your numeric choice:  1
+
+- pick project > ecas2
+Pick cloud project to use: 
+ [1] ecas2-nsf1904444
+ [2] numeric-button-321315
+ [3] Create a new project
+Please enter numeric choice or text value (must exactly match list 
+item):  1
+
+- Default zone
+Do you want to configure a default Compute Region and Zone? (Y/n)?  Y
+
+- choose engine > us-central1-f
+Which Google Compute Engine zone would you like to use as project 
+default?
+If you do not specify a zone via a command line flag while working 
+with Compute Engine resources, the default is assumed.
+[9] us-central1-f
+
+** gloud conection
+
+- connect to ssh machine: error no enough permission
+gcloud beta compute ssh --zone "us-central1-f" "g5-n1-controller"  --tunnel-through-iap --project "ecas2-nsf1904444"
+
+- error message
+ERROR: (gcloud.beta.compute.ssh) User [sergio.angulo@gmail.com] does not have permission to access users instance [sergio.angulo@gmail.com:importSshPublicKey] (or it may not exist): Insufficient IAM permissions. The instance belongs to an external organization. You must be granted the roles/compute.osLoginExternalUser IAM role on the external organization to configure POSIX account information.
+
+
+* TODO
+[x] git clone of A1 into my local files 
+[x] get an account in google cloud
+[ ] run one simulation in google cloud 
+
+
+
+
+
+
+

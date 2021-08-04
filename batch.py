@@ -267,10 +267,10 @@ def EIbalance1():
     initCfg['scaleDensity'] = 0.01 #0.05
     
  # plotting and saving params
-    initCfg[('analysis','plotRaster','timeRange')] = initCfg['printPopAvgRates']
-    initCfg[('analysis', 'plotTraces', 'timeRange')] = initCfg['printPopAvgRates']
-    initCfg[('analysis', 'plotLFP', 'timeRange')] = initCfg['printPopAvgRates']
-    initCfg[('analysis', 'plotCSD', 'timeRange')] = [1500, 1700]
+    #initCfg[('analysis','plotRaster','timeRange')] = initCfg['printPopAvgRates']
+    #initCfg[('analysis', 'plotTraces', 'timeRange')] = initCfg['printPopAvgRates']
+    #initCfg[('analysis', 'plotLFP', 'timeRange')] = initCfg['printPopAvgRates']
+    #initCfg[('analysis', 'plotCSD', 'timeRange')] = [1500, 1700]
 
     # changed directly in cfg.py    
     #initCfg[('analysis', 'plotCSD')] = {'spacing_um': 100, 'timeRange': initCfg['printPopAvgRates'], 'LFP_overlay': 1, 'layer_lines': 1, 'saveFig': 1, 'showFig': 0}
@@ -2824,7 +2824,7 @@ if __name__ == '__main__':
 
     cellTypes = ['IT2', 'PV2', 'SOM2', 'VIP2', 'NGF2', 'IT3', 'ITP4', 'ITS4', 'IT5A', 'CT5A', 'IT5B', 'PT5B', 'CT5B', 'IT6', 'CT6', 'TC', 'HTC', 'IRE', 'TI']
 
-    b = EIbalance()
+    b = EIbalance1()
     # b = custom()
     # b = evolRates()
     # b = asdRates()

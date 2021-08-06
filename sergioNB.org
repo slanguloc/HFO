@@ -661,7 +661,46 @@ def GABAAreversal():
 
     return b
 
-    
+
+* 8/6
+
+** salva comments:
+maybe try just params['EEGain'] = [1.0, 1.5] (2 sims) and increasing weights instead of decreasing, since that’s what we need for epilepsy - https://github.com/slanguloc/HFO/blob/e2c464a85c5dc034079b6fab798847944448cc09/batch.py#L259
+batch.py
+    params['EEGain'] = [0.5, 1.0] 
+<https://github.com/slanguloc/HFO|slanguloc/HFO>slanguloc/HFO | Added by GitHub
+1:23
+should set at least 2.5 secs since the network takes some time to reach a steady state - https://github.com/slanguloc/HFO/blob/main/batch.py#L266
+batch.py
+    initCfg['duration'] = 1.0 * 1e3
+<https://github.com/slanguloc/HFO|slanguloc/HFO>slanguloc/HFO | Added by GitHub
+1:24
+let’s set the full density (1.0) to run the real thing: https://github.com/slanguloc/HFO/blob/main/batch.py#L267
+batch.py
+    initCfg['scaleDensity'] = 0.01 #0.05
+<https://github.com/slanguloc/HFO|slanguloc/HFO>slanguloc/HFO | Added by GitHub
+1:24
+and let’s plot the raster: https://github.com/slanguloc/HFO/blob/main/batch.py#L270
+batch.py
+    #initCfg[('analysis','plotRaster','timeRange')] = initCfg['printPopAvgRates']
+<https://github.com/slanguloc/HFO|slanguloc/HFO>slanguloc/HFO | Added by GitHub
+1:26
+and here we can set the ‘hpc_slurm_gcp’ option so we can run fro, the GCP cluster - https://github.com/slanguloc/HFO/blob/main/batch.py#L2844
+batch.py
+    setRunCfg(b, 'mpi_bulletin') #'hpc_slurm_gcp') #'hpc_slurm_gcp') #'mpi_bulletin') #'hpc_slurm_gcp')
+<https://github.com/slanguloc/HFO|slanguloc/HFO>slanguloc/HFO | Added by GitHub
+1:26
+(I know I first said we would run from a single virtual machine, but I think it’s better to just go directly to the real deal and run on the cluster)
+1:27
+also you will need to update this to your home folder in the cluster: https://github.com/slanguloc/HFO/blob/main/batch.py#L2796 (you can wait until you log on to see what is that folder)
+batch.py
+            'folder': '/home/ext_salvadordura_gmail_com/A1_layers/',  # comet,gcp='/salvadord', bridges='/salvi82'
+<https://github.com/slanguloc/HFO|slanguloc/HFO>slanguloc/HFO | Added by GitHub
+
+** changes on batch.py
+
+
+
 
 
 * TODO
